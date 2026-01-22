@@ -1,6 +1,6 @@
 name: marionette_cli
 description: CLI tool for Flutter app interaction - enables AI assistants to inspect and interact with running Flutter apps via VM service.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/aumb/marionette_cli
 
 environment:

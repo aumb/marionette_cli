@@ -1,6 +1,7 @@
 import 'package:args/command_runner.dart';
 
 import '../services/vm_service_client.dart';
+import '../utils/exceptions.dart';
 import '../utils/output.dart';
 
 /// Command to scroll to bring an element into view.
@@ -89,20 +90,19 @@ class ScrollCommand extends Command<int> {
       );
 
       return ExitCode.success;
+    } on MarionetteException catch (e) {
+      Output.error(
+        e.message,
+        code: e.code,
+        details: {
+          if (elementKey != null) 'key': elementKey,
+          if (textMatch != null) 'text': textMatch,
+          if (typeMatch != null) 'type': typeMatch,
+          'hint': 'Run "marionette elements" to see available elements.',
+        },
+      );
+      return e.code == 'ELEMENT_NOT_FOUND' ? ExitCode.notFound : ExitCode.error;
     } on StateError catch (e) {
-      if (e.message.contains('not found') || e.message.contains('No element')) {
-        Output.error(
-          'Element not found',
-          code: 'ELEMENT_NOT_FOUND',
-          details: {
-            if (elementKey != null) 'key': elementKey,
-            if (textMatch != null) 'text': textMatch,
-            if (typeMatch != null) 'type': typeMatch,
-            'hint': 'Run "marionette elements" to see available elements',
-          },
-        );
-        return ExitCode.notFound;
-      }
       Output.error(e.message, code: 'NOT_CONNECTED');
       return ExitCode.connection;
     } catch (e) {

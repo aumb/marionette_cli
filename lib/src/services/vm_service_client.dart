@@ -6,6 +6,7 @@ import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
 import '../models/interactive_element.dart';
+import '../utils/exceptions.dart';
 import '../utils/session.dart';
 
 /// Client for communicating with a Flutter app's VM Service.
@@ -153,12 +154,21 @@ class VmServiceClient {
         args: args,
       );
 
-      return response.json ?? {};
+      final json = response.json ?? {};
+
+      // Check if the extension itself reported an error
+      if (json['status'] == 'Error') {
+        final errorMessage = json['error'] as String? ?? 'Unknown error';
+        throw MarionetteException.fromError(errorMessage);
+      }
+
+      return json;
     } on RPCError catch (e) {
       if (e.code == -32601) {
-        throw StateError(
+        throw MarionetteException(
           'Marionette extension "$method" not found. '
           'Ensure the Flutter app has marionette_flutter initialized.',
+          code: 'EXTENSION_NOT_FOUND',
         );
       }
       rethrow;
