@@ -254,29 +254,37 @@ marionette elements  # Should show success or next screen
    - If you tried `email_field`, look for keys containing `email`, `user`, `username`
    - Check the `label` field for human-readable text that matches your intent
 
-3. **Try the matching element**:
+3. **If you see the text you want but no key, use --text**:
    ```bash
-   marionette tap <found_similar_key>
+   marionette tap --text "Submit"
+   marionette scroll --text "See More"
    ```
 
-4. **If still not found, maybe scroll is needed**:
+**If scroll didn't work (element still not visible):**
+
+The scroll command needs the correct scrollable container, not the element itself. Try these fallbacks:
+
+1. **Use `--text` to scroll by visible text** (recommended):
    ```bash
-   marionette scroll <element_key>
-   marionette tap <element_key>
+   marionette scroll --text "Apples"      # Scroll to element containing "Apples"
+   marionette scroll --text "Load More"   # Scroll to load more button
    ```
 
-**Example - finding a similar button:**
-```bash
-# Tried: marionette tap login_button -> ELEMENT_NOT_FOUND
+2. **If targeting by key, make sure it's the target element, not a container**:
+   ```bash
+   # Wrong: scrolling to a Container/Column/Row key
+   marionette scroll main_content  # This is the page itself, won't scroll!
+   
+   # Right: scroll to the actual target by text
+   marionette scroll --text "Target Item"
+   ```
 
-# Step 1: Get elements
-marionette elements --filter Button
-
-# Step 2: Look for matches in output - found "signIn_btn" with label "Log In"
-
-# Step 3: Use the correct key
-marionette tap signIn_btn
-```
+3. **After scroll, verify with elements**:
+   ```bash
+   marionette scroll --text "Bananas"
+   marionette elements  # Verify "Bananas" now visible
+   marionette tap --text "Bananas"
+   ```
 
 **If loading never completes:**
 ```bash
